@@ -3,7 +3,13 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from backend.config import get_settings
 
+
 settings = get_settings()
+
+
+# =========================================================
+# DATABASE ENGINE
+# =========================================================
 
 engine = create_engine(
     settings.DATABASE_URL,
@@ -13,28 +19,56 @@ engine = create_engine(
     pool_recycle=settings.DB_POOL_RECYCLE,
 )
 
+
+# =========================================================
+# SESSION
+# =========================================================
+
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
     bind=engine,
 )
 
+
+# =========================================================
+# BASE
+# =========================================================
+
 Base = declarative_base()
 
 
+# =========================================================
+# DATABASE INITIALIZATION
+# =========================================================
+
+def init_db():
+    """
+    Create database tables if they do not already exist.
+
+    This does NOT delete existing tables or data.
+    """
+
+    # Import models here so SQLAlchemy registers
+    # Campaign, Recipient, and EmailEvent with Base.metadata.
+    from backend import models
+
+    Base.metadata.create_all(bind=engine)
+
+
+# =========================================================
+# DATABASE SESSION DEPENDENCY
+# =========================================================
+
 def get_db():
-    """Yield a DB session and always close it afterward."""
+    """
+    Yield a DB session and always close it afterward.
+    """
+
     db = SessionLocal()
 
     try:
         yield db
+
     finally:
         db.close()
-
-
-def init_db():
-    """Create all database tables if they do not already exist."""
-    # Import models here so SQLAlchemy registers all tables
-    from backend.models import Campaign, Recipient, EmailEvent
-
-    Base.metadata.create_all(bind=engine)

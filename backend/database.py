@@ -30,3 +30,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def init_db():
+    """Create all database tables if they do not already exist."""
+    # Import models here so SQLAlchemy registers all tables
+    from backend.models import Campaign, Recipient, EmailEvent
+
+    Base.metadata.create_all(bind=engine)

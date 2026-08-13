@@ -1,3 +1,4 @@
+from backend.database import init_db
 from contextlib import asynccontextmanager
 import logging
 
@@ -93,3 +94,8 @@ def health():
     return {
         "status": "healthy",
     }
+@app.on_event("startup")
+def startup():
+    logger.info("Starting E STAR Email Tracking API")
+
+    init_db()
